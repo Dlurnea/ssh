@@ -1,20 +1,20 @@
-# Use a base image with long-term support
+# Gunakan base image Ubuntu 22.04
 FROM ubuntu:22.04
 
 ARG AUTH_TOKEN
 ARG PASSWORD=rootuser
 
-# Install necessary packages and set locale
+# Install paket-paket yang diperlukan dan set locale
 RUN apt-get update \
     && apt-get install -y locales nano ssh sudo python3 curl wget unzip \
     && localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8 \
     && rm -rf /var/lib/apt/lists/*
 
-# Set environment variables for SSH and ngrok
+# Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive \
     LANG=en_US.UTF-8
 
-# Download and configure ngrok
+# Download dan konfigurasi ngrok
 RUN wget -O ngrok.zip https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.zip \
     && unzip ngrok.zip \
     && rm ngrok.zip \
@@ -28,8 +28,13 @@ RUN wget -O ngrok.zip https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux
     && echo root:${PASSWORD} | chpasswd \
     && chmod 755 /docker.sh
 
-# Expose necessary ports
+# Konfigurasi tampilan IP saat login melalui SSH
+RUN echo 'echo -e "\nIPv4 Addresses:\n$(hostname -I)" >> ~/.bashrc' >> /etc/skel/.bashrc \
+    && echo 'echo -e "IPv6 Addresses:\n$(ip -6 addr show | grep "inet6" | awk '{print $2}')" >> ~/.bashrc' >> /etc/skel/.bashrc \
+    && echo 'echo "Welcome, $(whoami)!"' >> /etc/skel/.bashrc
+
+# Expose ports yang diperlukan
 EXPOSE 80 8888 8080 443 5130-5135 3306 7860
 
-# Start SSH and ngrok when the container runs
+# Jalankan skrip saat container mulai
 CMD ["/bin/bash", "/docker.sh"]
