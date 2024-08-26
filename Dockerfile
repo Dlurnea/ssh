@@ -7,9 +7,8 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Install packages
 RUN apt update && apt upgrade -y && apt install -y \
-    ssh wget unzip vim curl python3 gnupg2 lsb-release \
-    ca-certificates build-essential libssl-dev libffi-dev python3-dev \
-    python3-pip python3-venv mariadb-server mariadb-client nginx \
+    ssh wget unzip vim curl python3 python3-pip python3-venv \
+    mariadb-server mariadb-client nginx \
     && apt clean
 
 # Install ngrok
@@ -35,9 +34,10 @@ RUN mkdir -p /var/www/pterodactyl \
     && tar -xzvf panel.tar.gz \
     && rm panel.tar.gz
 
-# Add setup script
+# Add setup script and Python script
 COPY setup.sh /setup.sh
-RUN chmod +x /setup.sh
+COPY get_ngrok_info.py /get_ngrok_info.py
+RUN chmod +x /setup.sh /get_ngrok_info.py
 
 # Configure SSH and ngrok
 RUN echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config \
@@ -46,7 +46,7 @@ RUN echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config \
     && echo "#!/bin/bash" > /docker.sh \
     && echo "/ngrok tcp 22 --authtoken ${NGROK_TOKEN} &" >> /docker.sh \
     && echo "sleep 5" >> /docker.sh \
-    && echo "curl -s http://localhost:4040/api/tunnels | python3 -c \"import sys, json; data=json.load(sys.stdin); url=data['tunnels'][0]['public_url']; ip = url.split('//')[1].split(':')[0]; port = url.split(':')[1]; print(f'SSH Info:\\nssh root@{ip} -p {port}\\nROOT Password:{PASSWORD}')\" || echo \"Error: NGROK_TOKEN, Reset ngrok token & try\"" >> /docker.sh \
+    && echo "python3 /get_ngrok_info.py ${PASSWORD}" >> /docker.sh \
     && echo '/usr/sbin/sshd -D' >> /docker.sh \
     && chmod +x /docker.sh
 
