@@ -1,5 +1,5 @@
 # Base image
-FROM debian
+FROM ubuntu:22.04
 
 ARG NGROK_TOKEN
 ARG PASSWORD=rootuser
@@ -43,11 +43,12 @@ RUN chmod +x /setup.sh
 RUN echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config \
     && echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config \
     && echo root:${PASSWORD} | chpasswd \
-    && echo "/ngrok tcp --authtoken ${NGROK_TOKEN} 22 &" >> /docker.sh \
+    && echo "#!/bin/bash" > /docker.sh \
+    && echo "/ngrok tcp 22 --authtoken ${NGROK_TOKEN} &" >> /docker.sh \
     && echo "sleep 5" >> /docker.sh \
-    && echo "curl -s http://localhost:4040/api/tunnels | python3 -c \"import sys, json; print(\\\"SSH Info:\\\n\\\",\\\"ssh\\\",\\\"root@\\\"+json.load(sys.stdin)['tunnels'][0]['public_url'][6:].replace(':', ' -p '),\\\"\\\nROOT Password:${PASSWORD}\\\")\" || echo \"\nError: NGROK_TOKEN, Reset ngrok token & try\n\"" >> /docker.sh \
+    && echo "curl -s http://localhost:4040/api/tunnels | python3 -c \"import sys, json; data=json.load(sys.stdin); url=data['tunnels'][0]['public_url']; ip = url.split('//')[1].split(':')[0]; port = url.split(':')[1]; print(f'SSH Info:\\nssh root@{ip} -p {port}\\nROOT Password:{PASSWORD}')\" || echo \"Error: NGROK_TOKEN, Reset ngrok token & try\"" >> /docker.sh \
     && echo '/usr/sbin/sshd -D' >> /docker.sh \
-    && chmod 755 /docker.sh
+    && chmod +x /docker.sh
 
 EXPOSE 22
 
