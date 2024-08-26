@@ -11,6 +11,9 @@ RUN apt update && apt upgrade -y && apt install -y \
     mariadb-server mariadb-client nginx \
     && apt clean
 
+# Install Python requests module
+RUN pip3 install requests
+
 # Install ngrok
 RUN wget -O ngrok.zip https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.zip \
     && unzip ngrok.zip \
