@@ -1,9 +1,7 @@
-# Base image
 FROM ubuntu:22.04
 
 ARG NGROK_TOKEN
 ARG PASSWORD=rootuser
-ARG REGION=ap  # Menggunakan 'ap' untuk Asia Pacific, termasuk Singapore
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Install packages
@@ -48,7 +46,7 @@ RUN echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config \
     && echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config \
     && echo root:${PASSWORD} | chpasswd \
     && echo "#!/bin/bash" > /docker.sh \
-    && echo "/ngrok tcp 22 --authtoken ${NGROK_TOKEN} --region=${REGION} &" >> /docker.sh \  # Tambahkan --region untuk mengatur region ke Singapore
+    && echo "/ngrok tcp 22 --authtoken ${NGROK_TOKEN} &" >> /docker.sh \
     && echo "sleep 5" >> /docker.sh \
     && echo "python3 /get_ngrok_info.py ${PASSWORD}" >> /docker.sh \
     && echo '/usr/sbin/sshd -D' >> /docker.sh \
