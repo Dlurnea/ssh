@@ -47,7 +47,7 @@ RUN echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config \
     && echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config \
     && echo root:${PASSWORD} | chpasswd \
     && echo "#!/bin/bash" > /docker.sh \
-    && echo "/ngrok tcp 22 --authtoken ${NGROK_TOKEN} &" >> /docker.sh \
+    && echo "/ngrok tcp 22 --authtoken ${NGROK_TOKEN} --region=ap &" >> /docker.sh \  # Menetapkan region Asia/Pacific
     && echo "sleep 5" >> /docker.sh \
     && echo "python3 /get_ngrok_info.py ${PASSWORD}" >> /docker.sh \
     && echo '/usr/sbin/sshd -D' >> /docker.sh \
