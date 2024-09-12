@@ -51,7 +51,7 @@ RUN echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config \
     && echo "sleep 5" >> /docker.sh \
     && echo "python3 /get_ngrok_info.py ${PASSWORD}" >> /docker.sh \
     && echo '/usr/sbin/sshd -D' >> /docker.sh \
-    && chmod +x /docker.sh
+    && chmod +x /docker.sh  # Menghapus spasi ekstra di depan '/docker.sh'
 
 EXPOSE 22
 
