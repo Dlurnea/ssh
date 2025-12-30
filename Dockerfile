@@ -1,5 +1,5 @@
-FROM ubuntu:22.04
-
+FROM debian:trixie
+LABEL maintainer="Jeff Geerling"
 ARG NGROK_TOKEN
 ARG PASSWORD=rootuser
 ENV DEBIAN_FRONTEND=noninteractive
